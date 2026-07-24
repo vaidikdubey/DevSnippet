@@ -7,14 +7,21 @@ import { ApiResponse } from "@/types/ApiResponse";
 import axios, { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
-import { Card, CardContent, CardHeader } from "@/components/ui/card";
+import {
+    Card,
+    CardContent,
+    CardFooter,
+    CardHeader,
+} from "@/components/ui/card";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
 
 const DashboardPage = () => {
     const [isGettingSnippets, setIsGettingSnippets] = useState(false);
-    const [snippets, setSnippets] = useState<Snippet[]>([]);
+    const [snippets, setSnippets] = useState<
+        (Snippet & { createdAt?: Date })[]
+    >([]);
 
     const { data: session } = useSession();
 
@@ -69,7 +76,7 @@ const DashboardPage = () => {
 
     return (
         <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
-            <div className="w-full flex items-center justify-between">
+            <div className="w-full flex items-center justify-between flex-wrap">
                 <h1 className="text-4xl font-bold mb-4">Snippets</h1>
 
                 <Button className="text-xl cursor-pointer" variant="default">
@@ -91,19 +98,55 @@ const DashboardPage = () => {
                             key={snippet._id.toString()}
                             className="w-full max-w-xs"
                         >
-                            <CardHeader>
+                            <CardHeader className="text-3xl font-bold underline underline-offset-4">
                                 {isGettingSnippets && (
                                     <>
                                         <Skeleton className="h-4 w-2/3" />
                                         <Skeleton className="h-4 w-1/2" />
                                     </>
                                 )}
+                                {snippet.title}
                             </CardHeader>
-                            <CardContent>
+                            <CardContent className="flex flex-col gap-3">
                                 {isGettingSnippets && (
                                     <Skeleton className="aspect-video w-full" />
                                 )}
+                                <div className="line-clamp-5">
+                                    {snippet.content}
+                                </div>
+
+                                <div className="flex justify-between items-center">
+                                    <span className="font-medium">
+                                        Language: {snippet.language}
+                                    </span>
+
+                                    {snippet.burnAfterRead && (
+                                        <span className="font-bold text-orange-500">
+                                            Burnable Snippet
+                                        </span>
+                                    )}
+                                </div>
                             </CardContent>
+                            <CardFooter className="flex justify-between items-center">
+                                <span>
+                                    <span className="font-medium">
+                                        Created:
+                                    </span>
+                                    {snippet.createdAt
+                                        ? new Date(
+                                              snippet.createdAt,
+                                          ).toLocaleDateString()
+                                        : "-"}
+                                </span>
+                                <span>
+                                    <span className="font-medium">Expiry:</span>
+                                    {snippet.expiresAt
+                                        ? new Date(
+                                              snippet.expiresAt,
+                                          ).toLocaleDateString()
+                                        : "-"}
+                                </span>
+                            </CardFooter>
                         </Card>
                     ))
                 ) : (
