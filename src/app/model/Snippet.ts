@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 
-export interface Snippet extends Document { 
+export interface Snippet extends Document {
+    userId: mongoose.Types.ObjectId; 
     title: string;
     content: string;
     language: string;
@@ -10,6 +11,11 @@ export interface Snippet extends Document {
 
 
 export const SnippetSchema: Schema<Snippet> = new Schema({
+    userId: {
+        type: Schema.Types.ObjectId,
+        ref: "User",
+        default: null
+    },
     title: {
         type: String,
         required: [true, "Title is required"],
