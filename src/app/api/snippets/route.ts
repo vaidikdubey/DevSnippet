@@ -1,0 +1,1 @@
+//GET (for user snippets) and POST (create new snippets)

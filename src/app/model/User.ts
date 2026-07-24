@@ -10,12 +10,12 @@ export interface User extends Document {
 
 const UserSchema: Schema<User> = new Schema({
     name: {
-        type: string,
+        type: String,
         required: [true, "Name is required"],
         trim: true,
     },
     email: {
-        type: string,
+        type: String,
         required: [true, "Email is required"],
         trim: true,
         unique: true,
@@ -26,7 +26,7 @@ const UserSchema: Schema<User> = new Schema({
         ],
     },
     password: {
-        type: string,
+        type: String,
         required: [true, "Password is required"]
     },
     snippets: [SnippetSchema],
