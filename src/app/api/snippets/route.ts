@@ -26,7 +26,7 @@ export async function GET(request: Request): Promise<Response> {
     const userId = new mongoose.Types.ObjectId(user.id);
 
     try {
-        const user = await UserModel.findById(userId);
+        const user = await UserModel.findById(userId).populate("snippets");
 
         if (!user)
             return Response.json(
@@ -104,6 +104,11 @@ export async function POST(request: Request): Promise<Response> {
         });
 
         await newSnippet.save();
+
+        //Push the new snippet's ID to the user's snippets array
+        await UserModel.findByIdAndUpdate(userId, {
+            $push: {snippets: newSnippet._id}
+        })
 
         return Response.json(
             {

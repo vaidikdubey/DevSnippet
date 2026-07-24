@@ -5,7 +5,7 @@ export interface User extends Document {
     name: string;
     email: string;
     password: string;
-    snippets: Snippet[];
+    snippets: mongoose.Types.ObjectId[];
 }
 
 const UserSchema: Schema<User> = new Schema({
@@ -27,11 +27,18 @@ const UserSchema: Schema<User> = new Schema({
     },
     password: {
         type: String,
-        required: [true, "Password is required"]
+        required: [true, "Password is required"],
     },
-    snippets: [SnippetSchema],
+    snippets: [
+        {
+            type: Schema.Types.ObjectId,
+            ref: "Snippet",
+        },
+    ],
 });
 
-const UserModel = (mongoose.models.User as mongoose.Model<User>) || (mongoose.model<User>("User", UserSchema));
+const UserModel =
+    (mongoose.models.User as mongoose.Model<User>) ||
+    mongoose.model<User>("User", UserSchema);
 
 export default UserModel;

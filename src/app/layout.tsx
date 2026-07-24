@@ -49,7 +49,7 @@ export default function RootLayout({
             )}
         >
             <AuthProvider>
-                <body className="min-h-full flex flex-col">
+                <body className="h-full flex flex-col">
                     {children} <Toaster />
                 </body>
             </AuthProvider>

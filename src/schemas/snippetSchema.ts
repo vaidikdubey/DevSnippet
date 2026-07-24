@@ -5,5 +5,5 @@ export const snippetSchema = z.object({
     content: z.string(),
     language: z.string().optional(),
     burnAfterRead: z.boolean().optional(),
-    expiresAt: z.date().optional(),
+    expiresAt: z.number().optional(),
 });
