@@ -3,6 +3,7 @@ import { Geist, Geist_Mono, Inter, Roboto_Slab } from "next/font/google";
 import "./globals.css";
 import { cn } from "@/lib/utils";
 import { Toaster } from "@/components/ui/toast";
+import AuthProvider from "@/context/AuthProvider";
 
 const robotoSlabHeading = Roboto_Slab({
     subsets: ["latin"],
@@ -25,8 +26,8 @@ export const metadata: Metadata = {
     title: "DevSnippet",
     description: "Create and manage your code snippets",
     icons: {
-        icon: "favicon.svg"
-    }
+        icon: "favicon.svg",
+    },
 };
 
 export default function RootLayout({
@@ -47,9 +48,11 @@ export default function RootLayout({
                 robotoSlabHeading.variable,
             )}
         >
-            <body className="min-h-full flex flex-col">
-                {children} <Toaster />
-            </body>
+            <AuthProvider>
+                <body className="min-h-full flex flex-col">
+                    {children} <Toaster />
+                </body>
+            </AuthProvider>
         </html>
     );
 }
