@@ -1,7 +1,7 @@
 //GET by ID
 
-import dbConnect from "@/app/lib/dbConnect";
-import SnippetModel from "@/app/model/Snippet";
+import dbConnect from "@/lib/dbConnect";
+import SnippetModel from "@/model/Snippet";
 import mongoose from "mongoose";
 
 export async function GET(

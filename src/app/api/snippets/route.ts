@@ -1,11 +1,11 @@
 //GET (for user snippets) and POST (create new snippets)
 
-import dbConnect from "@/app/lib/dbConnect";
-import UserModel from "@/app/model/User";
+import dbConnect from "@/lib/dbConnect";
+import UserModel from "@/model/User";
 import mongoose from "mongoose";
 import { getServerSession, User } from "next-auth";
 import { authOptions } from "../auth/[...nextauth]/options";
-import SnippetModel from "@/app/model/Snippet";
+import SnippetModel from "@/model/Snippet";
 
 export async function GET(request: Request): Promise<Response> {
     await dbConnect();
