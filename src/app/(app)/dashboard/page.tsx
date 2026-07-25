@@ -160,7 +160,7 @@ const DashboardPage = () => {
                                     {snippet.createdAt
                                         ? new Date(
                                               snippet.createdAt,
-                                          ).toLocaleDateString()
+                                          ).toLocaleString()
                                         : "-"}
                                 </span>
                                 <span>
@@ -168,7 +168,7 @@ const DashboardPage = () => {
                                     {snippet.expiresAt
                                         ? new Date(
                                               snippet.expiresAt,
-                                          ).toLocaleDateString()
+                                          ).toLocaleString()
                                         : "-"}
                                 </span>
                             </CardFooter>
