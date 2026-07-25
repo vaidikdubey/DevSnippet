@@ -83,12 +83,11 @@ const DashboardPage = () => {
                     <Link href={"/create"}>Create Snippet</Link>
                 </Button>
             </div>
-
             <div
                 className={cn(
                     "mt-4",
                     snippets.length > 0
-                        ? `grid grid-cols-1 md:grid-cols-2 gap-6`
+                        ? `grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6`
                         : `h-full w-full flex justify-center items-center`,
                 )}
             >
@@ -99,21 +98,23 @@ const DashboardPage = () => {
                             className="w-full max-w-xs"
                         >
                             <CardHeader className="text-3xl font-bold underline underline-offset-4">
-                                {isGettingSnippets && (
+                                {isGettingSnippets ? (
                                     <>
                                         <Skeleton className="h-4 w-2/3" />
                                         <Skeleton className="h-4 w-1/2" />
                                     </>
+                                ) : (
+                                    <Link href={`/snippet/${snippet._id}`}>{snippet.title}</Link>
                                 )}
-                                {snippet.title}
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3">
-                                {isGettingSnippets && (
+                                {isGettingSnippets ? (
                                     <Skeleton className="aspect-video w-full" />
+                                ) : (
+                                    <div className="line-clamp-5">
+                                        {snippet.content}
+                                    </div>
                                 )}
-                                <div className="line-clamp-5">
-                                    {snippet.content}
-                                </div>
 
                                 <div className="flex justify-between items-center">
                                     <span className="font-medium">
