@@ -38,10 +38,11 @@ const CreateSnippet = () => {
     const onSubmit = async (data: z.infer<typeof snippetSchema>) => {
         setIsSubmitting(true);
 
-        console.log(data);
-
         try {
-            const response = await axios.post("/api/snippets", data);
+            const response = await axios.post("/api/snippets", {
+                ...data,
+                expiresAt: Number(data?.expiresAt) || 0,
+            });
 
             toast.add({
                 title: "Success",
@@ -67,7 +68,9 @@ const CreateSnippet = () => {
 
     return (
         <div className="h-full w-full flex flex-col justify-center overflow-y-hidden items-center py-8 px-4">
-            <h1 className="text-2xl md:text-3xl my-2 underline underline-offset-4 font-bold">Create New Snippet</h1>
+            <h1 className="text-2xl md:text-3xl my-2 underline underline-offset-4 font-bold">
+                Create New Snippet
+            </h1>
             <form
                 className="h-full w-full"
                 id="snippet-form"
@@ -132,7 +135,9 @@ const CreateSnippet = () => {
                                         {...field}
                                         height="100%"
                                         width="100%"
-                                        defaultLanguage={language.toLowerCase().trim()}
+                                        defaultLanguage={language
+                                            .toLowerCase()
+                                            .trim()}
                                         onChange={(e) => {
                                             field.onChange(e);
                                         }}
