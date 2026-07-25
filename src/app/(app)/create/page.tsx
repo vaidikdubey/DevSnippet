@@ -24,25 +24,22 @@ const CreateSnippet = () => {
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [language, setLanguage] = useState("plaintext");
 
-    const form = useForm<z.infer<typeof snippetSchema>>({
+    const form = useForm<z.input<typeof snippetSchema>>({
         resolver: zodResolver(snippetSchema),
         defaultValues: {
             title: "",
             content: "",
             language: "",
             burnAfterRead: false,
-            expiresAt: 0,
+            expirationHours: 0,
         },
     });
 
-    const onSubmit = async (data: z.infer<typeof snippetSchema>) => {
+    const onSubmit = async (data: z.input<typeof snippetSchema>) => {
         setIsSubmitting(true);
 
         try {
-            const response = await axios.post("/api/snippets", {
-                ...data,
-                expiresAt: Number(data?.expiresAt) || 0,
-            });
+            const response = await axios.post("/api/snippets", data);
 
             toast.add({
                 title: "Success",
@@ -181,7 +178,7 @@ const CreateSnippet = () => {
                                 )}
                             />
                             <Controller
-                                name="expiresAt"
+                                name="expirationHours"
                                 control={form.control}
                                 render={({ field, fieldState }) => (
                                     <div className="flex items-center gap-2">
@@ -193,6 +190,7 @@ const CreateSnippet = () => {
                                         </Label>
                                         <Input
                                             {...field}
+                                            value={(field.value as number | string) ?? ""}
                                             id="snippet-form-expiry"
                                             aria-invalid={fieldState.invalid}
                                             type="number"
