@@ -7,7 +7,7 @@ import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { Loader2, Flame, Clock } from "lucide-react";
+import { Loader2, Flame, Clock, Copy } from "lucide-react";
 
 const ViewSnippetPage = () => {
     const params = useParams<{ id: string }>();
@@ -37,12 +37,6 @@ const ViewSnippetPage = () => {
                 expiresAt: fetchedSnippet.expiresAt
                     ? new Date(fetchedSnippet.expiresAt)
                     : new Date(0),
-            });
-
-            toast.add({
-                title: "Success",
-                description: response.data.message || "Snippet found",
-                type: "success",
             });
         } catch (error) {
             const axiosError = error as AxiosError<ApiResponse>;
@@ -85,6 +79,25 @@ const ViewSnippetPage = () => {
         );
     }
 
+    const copyToClipboard = () => {
+        if (!snippet.content) {
+            toast.add({
+                title: "Error",
+                description: "No content to copy",
+                type: "error",
+            });
+            return;
+        }
+
+        navigator.clipboard.writeText(snippet.content);
+
+        toast.add({
+            title: "Success",
+            description: "Snippet content copied to clipboard",
+            type: "success",
+        });
+    };
+
     return (
         <div className="h-full w-full flex flex-col justify-center overflow-y-hidden items-center py-8 px-4">
             <div className="h-full w-full flex flex-col text-xl gap-4 font-medium">
@@ -109,7 +122,7 @@ const ViewSnippetPage = () => {
                 </div>
 
                 {/* Monaco Editor (Read Only) */}
-                <div className="h-full min-h-100 max-h-100 lg:max-h-125 w-full border rounded-md overflow-hidden my-2">
+                <div className="h-full min-h-100 max-h-100 lg:max-h-125 w-full overflow-hidden my-2 flex gap-2">
                     <Editor
                         height="100%"
                         width="100%"
@@ -125,6 +138,10 @@ const ViewSnippetPage = () => {
                             minimap: { enabled: false },
                             scrollBeyondLastLine: false,
                         }}
+                    />
+                    <Copy
+                        className="cursor-pointer"
+                        onClick={copyToClipboard}
                     />
                 </div>
 

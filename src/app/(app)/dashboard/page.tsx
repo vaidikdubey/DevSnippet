@@ -16,6 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
+import { Copy } from "lucide-react";
 
 const DashboardPage = () => {
     const [isGettingSnippets, setIsGettingSnippets] = useState(false);
@@ -74,6 +75,24 @@ const DashboardPage = () => {
         );
     }
 
+    const baseUrl =
+        process.env.NEXT_PUBLIC_APP_URL ||
+        (typeof window !== "undefined"
+            ? `${window?.location.protocol}//${window?.location.host}`
+            : "");
+
+    const copyToClipboard = (id: string) => {
+        if (!id) return;
+
+        navigator.clipboard.writeText(`${baseUrl}/snippet/${id}`);
+
+        toast.add({
+            title: "Success",
+            description: "Snippet URL Copied",
+            type: "success",
+        });
+    };
+
     return (
         <div className="my-8 mx-4 md:mx-8 lg:mx-auto p-6 bg-white rounded w-full max-w-6xl">
             <div className="w-full flex items-center justify-between flex-wrap">
@@ -104,7 +123,12 @@ const DashboardPage = () => {
                                         <Skeleton className="h-4 w-1/2" />
                                     </>
                                 ) : (
-                                    <Link href={`/snippet/${snippet._id}`}>{snippet.title}</Link>
+                                    <div className="flex justify-between items-center">
+                                        <Link href={`/snippet/${snippet._id}`}>
+                                            {snippet.title}
+                                            </Link>
+                                        <Copy className="cursor-pointer" onClick={() => copyToClipboard(snippet._id.toString())}/>
+                                    </div>
                                 )}
                             </CardHeader>
                             <CardContent className="flex flex-col gap-3">
