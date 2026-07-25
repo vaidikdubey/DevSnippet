@@ -124,10 +124,20 @@ const DashboardPage = () => {
                                     </>
                                 ) : (
                                     <div className="flex justify-between items-center">
-                                        <Link href={`/snippet/${snippet._id}`} target="_blank">
+                                        <Link
+                                            href={`/snippet/${snippet._id}`}
+                                            target="_blank"
+                                        >
                                             {snippet.title}
-                                            </Link>
-                                        <Copy className="cursor-pointer" onClick={() => copyToClipboard(snippet._id.toString())}/>
+                                        </Link>
+                                        <Copy
+                                            className="cursor-pointer"
+                                            onClick={() =>
+                                                copyToClipboard(
+                                                    snippet._id.toString(),
+                                                )
+                                            }
+                                        />
                                     </div>
                                 )}
                             </CardHeader>
@@ -141,11 +151,15 @@ const DashboardPage = () => {
                                 )}
 
                                 <div className="flex justify-between items-center">
-                                    <span className="font-medium">
-                                        Language: {snippet.language}
-                                    </span>
+                                    {isGettingSnippets ? (
+                                        <Skeleton className="h-4 w-1/3" />
+                                    ) : (
+                                        <span className="font-medium">
+                                            Language: {snippet.language}
+                                        </span>
+                                    )}
 
-                                    {snippet.burnAfterRead && (
+                                    {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : snippet.burnAfterRead && (
                                         <span className="font-bold text-orange-500">
                                             Burnable Snippet
                                         </span>
@@ -153,7 +167,7 @@ const DashboardPage = () => {
                                 </div>
                             </CardContent>
                             <CardFooter className="flex justify-between items-center">
-                                <span>
+                                {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : <span>
                                     <span className="font-medium">
                                         Created:
                                     </span>
@@ -162,15 +176,15 @@ const DashboardPage = () => {
                                               snippet.createdAt,
                                           ).toLocaleString()
                                         : "-"}
-                                </span>
-                                <span>
+                                </span>}
+                                {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : <span>
                                     <span className="font-medium">Expiry:</span>
                                     {snippet.expiresAt
                                         ? new Date(
                                               snippet.expiresAt,
                                           ).toLocaleString()
                                         : "-"}
-                                </span>
+                                </span>}
                             </CardFooter>
                         </Card>
                     ))
