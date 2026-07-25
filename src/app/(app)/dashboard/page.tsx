@@ -124,7 +124,7 @@ const DashboardPage = () => {
                                     </>
                                 ) : (
                                     <div className="flex justify-between items-center">
-                                        <Link href={`/snippet/${snippet._id}`}>
+                                        <Link href={`/snippet/${snippet._id}`} target="_blank">
                                             {snippet.title}
                                             </Link>
                                         <Copy className="cursor-pointer" onClick={() => copyToClipboard(snippet._id.toString())}/>

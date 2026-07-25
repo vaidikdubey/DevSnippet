@@ -30,7 +30,7 @@ const Navbar = () => {
                         </span>
                         <Button
                             onClick={() => signOut()}
-                            className="w-full md:w-auto bg-slate-100 text-black"
+                            className="w-full md:w-auto bg-slate-100 text-black mt-4 md:mt-0"
                             variant="outline"
                         >
                             Logout
@@ -38,7 +38,7 @@ const Navbar = () => {
                     </>
                 ) : (
                     <Button
-                        className="w-full md:w-auto bg-slate-100 text-black"
+                        className="w-full md:w-auto bg-slate-100 text-black mt-4 md:mt-0"
                         variant="outline"
                     >
                         <Link href="/sign-in">Login</Link>

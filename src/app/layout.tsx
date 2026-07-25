@@ -26,7 +26,7 @@ export const metadata: Metadata = {
     title: "DevSnippet",
     description: "Create and manage your code snippets",
     icons: {
-        icon: "favicon.svg",
+        icon: "/favicon.svg",
     },
 };
 

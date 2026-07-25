@@ -7,7 +7,7 @@ import axios, { AxiosError } from "axios";
 import { useParams } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import Editor from "@monaco-editor/react";
-import { Loader2, Flame, Clock, Copy } from "lucide-react";
+import { Loader2, Flame, Clock } from "lucide-react";
 
 const ViewSnippetPage = () => {
     const params = useParams<{ id: string }>();
@@ -122,7 +122,13 @@ const ViewSnippetPage = () => {
                 </div>
 
                 {/* Monaco Editor (Read Only) */}
-                <div className="h-full min-h-100 max-h-100 lg:max-h-125 w-full overflow-hidden my-2 flex gap-2">
+                <div
+                    className="h-full min-h-100 max-h-100 lg:max-h-125 w-full overflow-hidden my-2 flex flex-col gap-2"
+                    onClick={copyToClipboard}
+                >
+                    <p className="text-right text-xs xl:text-sm text-red-500">
+                        *Click snippet to copy
+                    </p>
                     <Editor
                         height="100%"
                         width="100%"
@@ -138,10 +144,6 @@ const ViewSnippetPage = () => {
                             minimap: { enabled: false },
                             scrollBeyondLastLine: false,
                         }}
-                    />
-                    <Copy
-                        className="cursor-pointer"
-                        onClick={copyToClipboard}
                     />
                 </div>
 
