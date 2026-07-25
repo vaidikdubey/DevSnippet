@@ -71,6 +71,7 @@
 ## Backend
 
 - Next.js API Routes
+- NextAuth (Authentication)
 - MongoDB
 - Mongoose
 
