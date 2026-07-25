@@ -24,6 +24,5 @@ export const config = {
         "/sign-up",
         "/",
         "/dashboard/:path*",
-        "/create"
     ]
 }
