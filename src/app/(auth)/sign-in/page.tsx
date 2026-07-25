@@ -3,7 +3,6 @@ import { useState } from "react";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Controller, useForm } from "react-hook-form";
 import * as z from "zod";
-import { useRouter } from "next/navigation";
 import { signInSchema } from "@/schemas/signInSchema";
 import { signIn } from "next-auth/react";
 import Link from "next/link";
@@ -29,8 +28,6 @@ import { Eye, EyeOff, Loader2 } from "lucide-react";
 import { toast } from "@/components/ui/toast";
 
 const Page = () => {
-    const router = useRouter();
-
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [passwordVisible, setPasswordVisible] = useState(false);
 
@@ -47,7 +44,8 @@ const Page = () => {
     const onSubmit = async (data: z.infer<typeof signInSchema>) => {
         setIsSubmitting(true);
         const result = await signIn("credentials", {
-            redirect: false,
+            redirect: true,
+            callbackUrl: "/dashboard",
             email: data.email,
             password: data.password,
         });
@@ -69,9 +67,6 @@ const Page = () => {
         }
 
         setIsSubmitting(false);
-        if (result?.url) {
-            router.replace("/dashboard");
-        }
     };
 
     return (
@@ -88,7 +83,8 @@ const Page = () => {
                     <CardHeader>
                         <CardTitle>Access your account</CardTitle>
                         <CardDescription>
-                            Enter your credentials to access your saved snippets.
+                            Enter your credentials to access your saved
+                            snippets.
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
