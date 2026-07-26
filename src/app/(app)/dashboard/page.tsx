@@ -125,8 +125,7 @@ const DashboardPage = () => {
                                 ) : (
                                     <div className="flex justify-between items-center">
                                         <Link
-                                            href={`/snippet/${snippet._id}`}
-                                            target="_blank"
+                                            href={`/update/${snippet._id}?burn=false`}
                                         >
                                             {snippet.title}
                                         </Link>

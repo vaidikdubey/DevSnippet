@@ -1,8 +1,10 @@
 //GET by ID
 
 import dbConnect from "@/lib/dbConnect";
-import SnippetModel from "@/model/Snippet";
+import SnippetModel, { Snippet } from "@/model/Snippet";
 import mongoose from "mongoose";
+import { getServerSession, User} from "next-auth";
+import { authOptions } from "../../auth/[...nextauth]/options";
 
 export async function GET(
     request: Request,
@@ -15,6 +17,9 @@ export async function GET(
     const snippetId = new mongoose.Types.ObjectId(id);
 
     try {
+        const { searchParams } = new URL(request.url);
+        const burn: boolean = searchParams.get("burn") !== "false";
+
         const snippet = await SnippetModel.findById(snippetId);
 
         if (!snippet)
@@ -27,7 +32,7 @@ export async function GET(
             );
 
         //If burn after read is enabled delete the snippet. We can safely delete as we already have a local copy for response in snippet variable.
-        if (snippet.burnAfterRead) {
+        if (burn && snippet.burnAfterRead) {
             await SnippetModel.findByIdAndDelete(snippetId);
         }
 
@@ -45,6 +50,86 @@ export async function GET(
             {
                 success: false,
                 message: "Error getting snippet",
+            },
+            { status: 500 },
+        );
+    }
+}
+
+export async function PATCH(
+    request: Request,
+    context: { params: Promise<{ id: string }> },
+): Promise<Response> {
+    await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    const user: User = session?.user as User;
+    const userId = new mongoose.Types.ObjectId(user.id);
+
+    if (!session || !session.user) {
+        return Response.json(
+            {
+                success: false,
+                message: "Not Authenticated",
+            },
+            { status: 401 },
+        );
+    }
+
+    const id = (await context.params).id;
+    const snippetId = new mongoose.Types.ObjectId(id);
+
+    try {
+        const snippet = await SnippetModel.findById(snippetId);
+
+        if (!snippet)
+            return Response.json(
+                {
+                    success: false,
+                    message: "Snippet not found or expired",
+                },
+                { status: 404 },
+            );
+
+        if(snippet.userId !== userId) return Response.json({
+            success: false,
+            message: "Unauthorized"
+        }, {status: 403})
+
+        const { title, content, language, burnAfterRead, expirationHours } =
+            await request.json();
+
+        if (!content || !content.trim() || typeof content != "string")
+            return Response.json(
+                {
+                    success: false,
+                    message: "Content is required and cannot be empty",
+                },
+                { status: 400 },
+            );
+
+        const data: Partial<Snippet> = {};
+
+        data.content = content;
+
+        if (title) data.title = title;
+        if (language) data.language = language;
+        if (burnAfterRead !== undefined) data.burnAfterRead = Boolean(burnAfterRead);
+        if (expirationHours && expirationHours > 0) data.expiresAt = new Date(Date.now() + expirationHours * 60 * 60 * 1000);
+
+        const updatedSnippet = await SnippetModel.findByIdAndUpdate(snippetId, data, {new: true, runValidators: true})
+
+        return Response.json({
+            success: true,
+            message: "Snippet updated",
+            updatedSnippet
+        }, {status: 200})
+    } catch (error) {
+        console.error("Error creating snippet", error);
+        return Response.json(
+            {
+                success: false,
+                message: "Error creating snippet",
             },
             { status: 500 },
         );
