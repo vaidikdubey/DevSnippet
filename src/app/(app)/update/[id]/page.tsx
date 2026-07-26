@@ -8,8 +8,9 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { Editor } from "@monaco-editor/react";
 import axios, { AxiosError } from "axios";
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
+import { useSession } from "next-auth/react";
 import { z } from "zod";
 
 import { Label } from "@/components/ui/label";
@@ -17,19 +18,20 @@ import { Input } from "@/components/ui/input";
 import { FieldError } from "@/components/ui/field";
 import { Switch } from "@/components/ui/switch";
 import { Button } from "@/components/ui/button";
-import { RefreshCcw } from "lucide-react";
+import { Loader } from "lucide-react";
 
 const UpdatePage = () => {
     const id = useParams<{ id: string }>().id;
 
-    const burn = useSearchParams().get("burn") !== "false"
+    const burn = useSearchParams().get("burn") !== "false"    
 
-    
+    const router = useRouter();
 
-      const router = useRouter();
+    const { data: session } = useSession();
 
-    const [isSubmitting, setIsSubmitting] = useState(false);
-    const [language, setLanguage] = useState("plaintext");
+    const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+    const [isFetchingSnippet, setIsFetchingSnippet] = useState<boolean>(false);
+    const [language, setLanguage] = useState<string>("");
 
     const form = useForm<z.input<typeof snippetSchema>>({
         resolver: zodResolver(snippetSchema),
@@ -42,15 +44,47 @@ const UpdatePage = () => {
         },
     });
 
+    const fetchSnippet = useCallback(async () => { 
+        setIsFetchingSnippet(true);
+
+        try {
+            const response = await axios.get(`/api/snippets/${id}?burn=${burn}`)
+
+            form.setValues(response.data.snippet)
+
+            setLanguage(response.data.snippet?.language || "plaintext")
+        }
+        catch (error) {
+            const axiosError = error as AxiosError<ApiResponse>;
+
+            toast.add({
+                title: "Error",
+                description:
+                    axiosError.response?.data.message ||
+                    "Error getting snippet",
+                type: "error",
+            });
+        }
+        finally { 
+            setIsFetchingSnippet(false);
+        }
+    }, [form, burn, id])
+
+    useEffect(() => {
+        if (!session || !session.user) return;
+
+        fetchSnippet();
+    }, [session, fetchSnippet])
+
     const onSubmit = async (data: z.input<typeof snippetSchema>) => {
         setIsSubmitting(true);
 
         try {
-            const response = await axios.post("/api/snippets", data);
+            const response = await axios.patch(`/api/snippets/${id}`, data);
 
             toast.add({
                 title: "Success",
-                description: response.data.message || "Snippet created",
+                description: response.data.message || "Snippet update",
                 type: "success",
             });
 
@@ -70,10 +104,28 @@ const UpdatePage = () => {
         }
     };
 
+    if (!session || !session.user) {
+        return (
+            <div className="flex items-center justify-center min-h-50">
+                <p className="text-muted-foreground">
+                    Please sign in to view your snippets.
+                </p>
+            </div>
+        );
+    }
+
+    if (isFetchingSnippet) { 
+        return (
+            <div className="h-full flex items-center justify-center">
+                <Loader className="animate-spin text-foreground" /> Fetching Snippet
+            </div>
+        );
+    }
+
     return (
         <div className="h-full w-full flex flex-col justify-center overflow-y-hidden items-center py-8 px-4">
             <h1 className="text-2xl md:text-3xl my-2 underline underline-offset-4 font-bold">
-                Create New Snippet
+                Update Snippet
             </h1>
             <form
                 className="h-full w-full"
@@ -214,24 +266,13 @@ const UpdatePage = () => {
                     </div>
                 </div>
             </form>
-            <div className="w-full flex justify-center items-center my-4 gap-2">
-                <Button
-                    type="reset"
-                    form="snippet-form"
-                    onClick={() => form.reset()}
-                    disabled={isSubmitting}
-                    variant="outline"
-                >
-                    Reset <RefreshCcw />
-                </Button>
                 <Button
                     type="submit"
                     form="snippet-form"
                     disabled={isSubmitting}
                 >
-                    Create Snippet
+                    Update Snippet
                 </Button>
-            </div>
         </div>
     );
 }

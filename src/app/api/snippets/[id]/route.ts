@@ -1,9 +1,9 @@
-//GET by ID
+//GET by ID, PATCH for update by ID
 
 import dbConnect from "@/lib/dbConnect";
 import SnippetModel, { Snippet } from "@/model/Snippet";
 import mongoose from "mongoose";
-import { getServerSession, User} from "next-auth";
+import { getServerSession, User } from "next-auth";
 import { authOptions } from "../../auth/[...nextauth]/options";
 
 export async function GET(
@@ -31,7 +31,7 @@ export async function GET(
                 { status: 404 },
             );
 
-        //If burn after read is enabled delete the snippet. We can safely delete as we already have a local copy for response in snippet variable.
+        //If burn after read is enabled and the request is not for update route delete the snippet. We can safely delete as we already have a local copy for response in snippet variable.
         if (burn && snippet.burnAfterRead) {
             await SnippetModel.findByIdAndDelete(snippetId);
         }
@@ -91,10 +91,15 @@ export async function PATCH(
                 { status: 404 },
             );
 
-        if(snippet.userId !== userId) return Response.json({
-            success: false,
-            message: "Unauthorized"
-        }, {status: 403})
+        //Cannot directly use !== beacuse MongoDB objectIds become objects in JS/TS and strict eqaulity check needs same reference for objects to be "true", so === will always be "false"
+        if (!snippet.userId.equals(userId))
+            return Response.json(
+                {
+                    success: false,
+                    message: "Unauthorized",
+                },
+                { status: 403 },
+            );
 
         const { title, content, language, burnAfterRead, expirationHours } =
             await request.json();
@@ -114,16 +119,27 @@ export async function PATCH(
 
         if (title) data.title = title;
         if (language) data.language = language;
-        if (burnAfterRead !== undefined) data.burnAfterRead = Boolean(burnAfterRead);
-        if (expirationHours && expirationHours > 0) data.expiresAt = new Date(Date.now() + expirationHours * 60 * 60 * 1000);
+        if (burnAfterRead !== undefined)
+            data.burnAfterRead = Boolean(burnAfterRead);
+        if (expirationHours && expirationHours > 0)
+            data.expiresAt = new Date(
+                Date.now() + expirationHours * 60 * 60 * 1000,
+            );
 
-        const updatedSnippet = await SnippetModel.findByIdAndUpdate(snippetId, data, {new: true, runValidators: true})
+        const updatedSnippet = await SnippetModel.findByIdAndUpdate(
+            snippetId,
+            data,
+            { new: true, runValidators: true },
+        );
 
-        return Response.json({
-            success: true,
-            message: "Snippet updated",
-            updatedSnippet
-        }, {status: 200})
+        return Response.json(
+            {
+                success: true,
+                message: "Snippet updated",
+                updatedSnippet,
+            },
+            { status: 200 },
+        );
     } catch (error) {
         console.error("Error creating snippet", error);
         return Response.json(

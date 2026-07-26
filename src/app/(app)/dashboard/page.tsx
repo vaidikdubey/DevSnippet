@@ -16,7 +16,7 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Copy } from "lucide-react";
+import { Copy, Flame, Leaf } from "lucide-react";
 
 const DashboardPage = () => {
     const [isGettingSnippets, setIsGettingSnippets] = useState(false);
@@ -114,7 +114,7 @@ const DashboardPage = () => {
                     snippets.map((snippet) => (
                         <Card
                             key={snippet._id.toString()}
-                            className="w-full max-w-xs"
+                            className="w-full flex flex-col justify-between overflow-hidden"
                         >
                             <CardHeader className="text-3xl font-bold underline underline-offset-4">
                                 {isGettingSnippets ? (
@@ -123,24 +123,15 @@ const DashboardPage = () => {
                                         <Skeleton className="h-4 w-1/2" />
                                     </>
                                 ) : (
-                                    <div className="flex justify-between items-center">
-                                        <Link
-                                            href={`/update/${snippet._id}?burn=false`}
-                                        >
-                                            {snippet.title}
-                                        </Link>
-                                        <Copy
-                                            className="cursor-pointer"
-                                            onClick={() =>
-                                                copyToClipboard(
-                                                    snippet._id.toString(),
-                                                )
-                                            }
-                                        />
-                                    </div>
+                                    <Link
+                                        href={`/update/${snippet._id}?burn=false`}
+                                        className="block w-full min-w-0 truncate"
+                                    >
+                                        {snippet.title}
+                                    </Link>
                                 )}
                             </CardHeader>
-                            <CardContent className="flex flex-col gap-3">
+                            <CardContent className="flex-1 flex flex-col gap-3">
                                 {isGettingSnippets ? (
                                     <Skeleton className="aspect-video w-full" />
                                 ) : (
@@ -154,37 +145,74 @@ const DashboardPage = () => {
                                         <Skeleton className="h-4 w-1/3" />
                                     ) : (
                                         <span className="font-medium">
-                                            Language: {snippet.language}
+                                            Language:{" "}
+                                            {snippet.language.toLocaleUpperCase()}
                                         </span>
                                     )}
 
-                                    {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : snippet.burnAfterRead && (
-                                        <span className="font-bold text-orange-500">
-                                            Burnable Snippet
-                                        </span>
+                                    {isGettingSnippets ? (
+                                        <Skeleton className="h-4 w-1/3" />
+                                    ) : (
+                                        snippet.burnAfterRead && (
+                                            <span className="flex items-center gap-1 text-xs font-semibold bg-red-100 text-red-600 px-2.5 py-1 rounded-full">
+                                                <Flame className="w-3.5 h-3.5" />{" "}
+                                                Burn
+                                            </span>
+                                        )
                                     )}
                                 </div>
                             </CardContent>
-                            <CardFooter className="flex justify-between items-center">
-                                {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : <span>
-                                    <span className="font-medium">
-                                        Created:
+                            <CardFooter className="flex flex-col justify-between items-start gap-1 rounded-b-none">
+                                {isGettingSnippets ? (
+                                    <Skeleton className="h-4 w-1/3" />
+                                ) : (
+                                    <span>
+                                        <span className="font-medium">
+                                            Created:
+                                        </span>{" "}
+                                        {snippet.createdAt
+                                            ? new Date(
+                                                  snippet.createdAt,
+                                              ).toLocaleString(undefined, {
+                                                  dateStyle: "short",
+                                                  timeStyle: "short",
+                                              })
+                                            : "-"}
                                     </span>
-                                    {snippet.createdAt
-                                        ? new Date(
-                                              snippet.createdAt,
-                                          ).toLocaleString()
-                                        : "-"}
-                                </span>}
-                                {isGettingSnippets ? <Skeleton className="h-4 w-1/3" /> : <span>
-                                    <span className="font-medium">Expiry:</span>
-                                    {snippet.expiresAt
-                                        ? new Date(
-                                              snippet.expiresAt,
-                                          ).toLocaleString()
-                                        : "-"}
-                                </span>}
+                                )}
+                                {isGettingSnippets ? (
+                                    <Skeleton className="h-4 w-1/3" />
+                                ) : (
+                                    <div className="flex items-center gap-1">
+                                        <span className="font-medium">
+                                            Expiry:
+                                        </span>{" "}
+                                        {snippet.expiresAt ? (
+                                            new Date(
+                                                snippet.expiresAt,
+                                            ).toLocaleString(undefined, {
+                                                dateStyle: "short",
+                                                timeStyle: "short",
+                                            })
+                                        ) : (
+                                            <span className="w-fit flex justify-center items-center gap-2 text-green-400">
+                                                Non expiring{" "}
+                                                <Leaf size={15} />{" "}
+                                            </span>
+                                        )}
+                                    </div>
+                                )}
                             </CardFooter>
+                            <Button
+                                onClick={() =>
+                                    copyToClipboard(snippet._id.toString())
+                                }
+                                className="w-full rounded-none border-x-0 border-b-0"
+                                variant="outline"
+                            >
+                                Copy Link
+                                <Copy />
+                            </Button>
                         </Card>
                     ))
                 ) : (
