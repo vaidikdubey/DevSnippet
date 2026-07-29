@@ -1,12 +1,14 @@
 "use client";
 
 import { toast } from "@/components/ui/toast";
+import mongoose from "mongoose";
 import { cn } from "@/lib/utils";
 import { Snippet } from "@/model/Snippet";
 import { ApiResponse } from "@/types/ApiResponse";
 import axios, { AxiosError } from "axios";
 import { useSession } from "next-auth/react";
 import { useCallback, useEffect, useState } from "react";
+import { useRouter } from "next/navigation";
 import {
     Card,
     CardContent,
@@ -16,10 +18,25 @@ import {
 import { Skeleton } from "@/components/ui/skeleton";
 import { Button } from "@/components/ui/button";
 import Link from "next/link";
-import { Copy, Flame, Leaf } from "lucide-react";
+import { Copy, Flame, Leaf, Loader2, Trash2 } from "lucide-react";
+import {
+    AlertDialog,
+    AlertDialogAction,
+    AlertDialogCancel,
+    AlertDialogContent,
+    AlertDialogDescription,
+    AlertDialogFooter,
+    AlertDialogHeader,
+    AlertDialogTitle,
+    AlertDialogTrigger,
+} from "@/components/ui/alert-dialog";
 
 const DashboardPage = () => {
-    const [isGettingSnippets, setIsGettingSnippets] = useState(false);
+    const router = useRouter();
+
+    const [isGettingSnippets, setIsGettingSnippets] = useState<boolean>(false);
+    const [isDeletingSnippet, setIsDeletingSnippet] = useState<boolean>(false);
+    const [open, setOpen] = useState<boolean>(false);
     const [snippets, setSnippets] = useState<
         (Snippet & { createdAt?: Date })[]
     >([]);
@@ -91,6 +108,46 @@ const DashboardPage = () => {
             description: "Snippet URL Copied",
             type: "success",
         });
+    };
+
+    const handleSnippetDelete = async (
+        id: string | mongoose.Types.ObjectId,
+    ) => {
+        if (!id) {
+            toast.add({
+                title: "Error",
+                description: "Invalid or missing snippet ID",
+                type: "error",
+            });
+
+            return;
+        }
+
+        setIsDeletingSnippet(true);
+
+        try {
+            const response = await axios.delete(`/api/snippets/${id}`);
+
+            toast.add({
+                title: "Success",
+                description: response.data.message || "Snippet deleted",
+                type: "success",
+            });
+        } catch (error) {
+            const axiosError = error as AxiosError<ApiResponse>;
+
+            toast.add({
+                title: "Error",
+                description:
+                    axiosError.response?.data.message ||
+                    "Failed to refresh snippets",
+                type: "error",
+            });
+        } finally {
+            setIsDeletingSnippet(false);
+            router.refresh();
+            setOpen(false);
+        }
     };
 
     return (
@@ -203,16 +260,72 @@ const DashboardPage = () => {
                                     </div>
                                 )}
                             </CardFooter>
-                            <Button
-                                onClick={() =>
-                                    copyToClipboard(snippet._id.toString())
-                                }
-                                className="w-full rounded-none border-x-0 border-b-0"
-                                variant="outline"
-                            >
-                                Copy Link
-                                <Copy />
-                            </Button>
+                            <div>
+                                <Button
+                                    onClick={() =>
+                                        copyToClipboard(snippet._id.toString())
+                                    }
+                                    className="w-full rounded-none border-b-0"
+                                    variant="outline"
+                                >
+                                    Copy Link
+                                    <Copy />
+                                </Button>
+                                <AlertDialog open={open} onOpenChange={setOpen}>
+                                    <AlertDialogTrigger
+                                        render={
+                                            <Button
+                                                className="w-full rounded-none border-x-0 border-b-0"
+                                                variant="destructive"
+                                                disabled={isDeletingSnippet}
+                                            >
+                                                Delete Snippet <Trash2 />
+                                            </Button>
+                                        }
+                                    />
+                                    <AlertDialogContent>
+                                        <AlertDialogHeader>
+                                            <AlertDialogTitle>
+                                                Are you absolutely sure?
+                                            </AlertDialogTitle>
+                                            <AlertDialogDescription>
+                                                This action cannot be undone.
+                                                This will permanently delete{" "}
+                                                <span className="font-bold">
+                                                    &ldquo;{snippet.title}
+                                                    &rdquo;
+                                                </span>{" "}
+                                                snippet from our servers.
+                                            </AlertDialogDescription>
+                                        </AlertDialogHeader>
+                                        <AlertDialogFooter>
+                                            <AlertDialogCancel
+                                                disabled={isDeletingSnippet}
+                                            >
+                                                Cancel
+                                            </AlertDialogCancel>
+                                            <AlertDialogAction
+                                                disabled={isDeletingSnippet}
+                                                onClick={() =>
+                                                    handleSnippetDelete(
+                                                        snippet._id,
+                                                    )
+                                                }
+                                                variant="destructive"
+                                            >
+                                                {isDeletingSnippet ? (
+                                                    <>
+                                                        <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                                                        Deleting{" "}
+                                                    </>
+                                                ) : (
+                                                    "Delete"
+                                                )}
+                                            </AlertDialogAction>
+                                        </AlertDialogFooter>
+                                    </AlertDialogContent>
+                                </AlertDialog>
+                            </div>
                         </Card>
                     ))
                 ) : (
