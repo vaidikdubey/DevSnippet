@@ -151,3 +151,60 @@ export async function PATCH(
         );
     }
 }
+
+export async function DELETE(
+    request: Request,
+    context: { params: Promise<{ id: string }> },
+): Promise<Response> {
+    await dbConnect();
+
+    const session = await getServerSession(authOptions);
+    const user: User = session?.user as User;
+    const userId = new mongoose.Types.ObjectId(user.id);
+
+    if (!session || !session.user) {
+        return Response.json(
+            {
+                success: false,
+                message: "Not Authenticated",
+            },
+            { status: 401 },
+        );
+    }
+
+    const id = (await context.params).id;
+    const snippetId = new mongoose.Types.ObjectId(id);
+
+    try {
+        const snippet = await SnippetModel.findOneAndDelete({
+            _id: snippetId,
+            userId,
+        });
+
+        if (!snippet)
+            return Response.json(
+                {
+                    success: false,
+                    message: "Snippet not found or unauthorized",
+                },
+                { status: 404 },
+            );
+
+        return Response.json(
+            {
+                success: true,
+                message: "Snippet deleted",
+            },
+            { status: 200 },
+        );
+    } catch (error) {
+        console.error("Error creating snippet", error);
+        return Response.json(
+            {
+                success: false,
+                message: "Error deleting snippet",
+            },
+            { status: 500 },
+        );
+    }
+}
