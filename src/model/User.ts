@@ -1,5 +1,4 @@
 import mongoose, { Schema, Document } from "mongoose";
-import { Snippet, SnippetSchema } from "./Snippet";
 
 export interface User extends Document {
     name: string;

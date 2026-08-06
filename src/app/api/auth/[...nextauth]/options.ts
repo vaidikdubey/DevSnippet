@@ -3,9 +3,14 @@ import UserModel from "@/model/User";
 import bcrypt from "bcryptjs";
 import { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
 
 export const authOptions: NextAuthOptions = {
     providers: [
+        GoogleProvider({
+            clientId: process.env.GOOGLE_OAUTH_CLIENT_ID || "",
+            clientSecret: process.env.GOOGLE_OAUTH_CLIENT_SECRET || "",
+        }),
         CredentialsProvider({
             id: "credentials",
             name: "Credentials",
@@ -46,16 +51,50 @@ export const authOptions: NextAuthOptions = {
     ],
 
     callbacks: {
-        async jwt({ token, user }) {
-            if (user) { 
-                token._id = user.id
+        async signIn({ account, profile }) {
+            if (account?.provider === "google") {
+                await dbConnect();
+
+                try {
+                    const user = await UserModel.findOne({
+                        email: profile?.email,
+                    });
+
+                    //If new user, we redirect them to sign-up page
+                    if (!user) {
+                        return `/sign-up`;
+                    }
+
+                    return true;
+                } catch (error) {
+                    console.error("Error signing in user with google", error);
+                    return false;
+                }
+            }
+
+            return true;
+        },
+
+        async jwt({ token, user, account }) {
+            if (user) {
+                //If user sign-in is through google we find _id and attach in token
+                if (account?.provider === "google") {
+                    await dbConnect();
+                    const dbUser = await UserModel.findOne({
+                        email: user.email,
+                    });
+
+                    if (dbUser) token._id = dbUser._id.toString();
+                } else {
+                    token._id = user.id;
+                }
             }
             return token;
         },
 
         async session({ session, token }) {
-            if (session.user && token._id) { 
-                session.user.id = token._id as string
+            if (session.user && token._id) {
+                session.user.id = token._id as string;
             }
             return session;
         },
