@@ -25,6 +25,7 @@
 ### 🔒 Your Private Snippets
 
 - Create account with your email and password.
+- Easy login with Google and GitHub OAuth.
 - Snippets are associated with your account.
 - Only you can view all your snippets and choose which ones to share.
 
@@ -146,6 +147,10 @@ Create a `.env` file inside the server directory.
 MONGODB_URI=your_mongodb_connection_string
 NEXT_PUBLIC_APP_URL=http://localhost:3000
 NEXTAUTH_SECRET=your_nextauth_secret
+GOOGLE_OAUTH_CLIENT_ID=your_google_oauth_client_id
+GOOGLE_OAUTH_CLIENT_SECRET=your_google_oauth_client_secret
+GITHUB_OAUTH_CLIENT_ID=your_github_oauth_client_id
+GITHUB_OAUTH_CLIENT_SECRET=your_github_oauth_client_secret
 ```
 
 ---
@@ -197,6 +202,9 @@ If **Burn After Reading** is enabled:
 - Landing Page
 ![DevSnippet - Landing Page](./public/landing-page.png)
 
+- Sign In Page
+![DevSnippet - Sign In Page](./public/sign-in-page.png)
+
 - Dashboard
 ![DevSnippet - Dashboard](./public//dashboard.png)
 
@@ -221,6 +229,8 @@ Unlike traditional paste tools, DevSnippet focuses on simplicity and privacy.
 ✅ VS Code-like editing experience
 
 ✅ Fast sharing
+
+✅ Secure snippets and easy access with Google and GitHub login providers
 
 ---
 
