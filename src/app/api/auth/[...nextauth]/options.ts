@@ -52,7 +52,7 @@ export const authOptions: NextAuthOptions = {
 
     callbacks: {
         async signIn({ account, profile }) {
-            if (account?.provider === "google") {
+            if (account?.provider !== "credentials") {
                 await dbConnect();
 
                 try {
@@ -78,7 +78,7 @@ export const authOptions: NextAuthOptions = {
         async jwt({ token, user, account }) {
             if (user) {
                 //If user sign-in is through google we find _id and attach in token
-                if (account?.provider === "google") {
+                if (account?.provider !== "credentials") {
                     await dbConnect();
                     const dbUser = await UserModel.findOne({
                         email: user.email,
